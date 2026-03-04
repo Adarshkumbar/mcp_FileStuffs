@@ -109,3 +109,27 @@ To fully implement the MCP features:
 ### Linting and Typing Check
 
 There are no lint or type checks implemented.
+
+
+### Key Benefits of the SDK Approach
+No manual JSON schema writing required
+Type hints provide automatic validation
+Clear parameter descriptions help Claude understand tool usage
+Error handling integrates naturally with Python exceptions
+Tool registration happens automatically through decorators
+The MCP Python SDK transforms tool creation from a complex schema-writing exercise into simple Python function definitions. This approach makes it much easier to build and maintain MCP servers while ensuring LLM receives properly formatted tool specifications.
+
+
+### For windows and facing issues with above steps (created venv for local dependencies)
+
+# 1. Activate your project venv
+.\.venv\Scripts\activate
+
+# 2. Make sure pip itself is up to date
+python -m pip install --upgrade pip
+
+# 3. Remove any broken installs
+pip uninstall -y pydantic-core pydantic
+
+# 4. Reinstall a known-good pydantic v2 (which pulls pydantic-core)
+pip install "pydantic==2.9.2"
