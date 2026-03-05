@@ -1,5 +1,6 @@
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
+from mcp.server.fastmcp.prompts import base
 
 mcp = FastMCP("DocumentMCP", log_level="ERROR")
 
@@ -59,7 +60,32 @@ def get_doc_content(doc_id: str) -> str:
         raise ValueError(f"Document {doc_id} not found")
     return docs[doc_id]
 
-# TODO: Write a prompt to rewrite a doc in markdown format
+#  A prompt to rewrite a doc in markdown format
+@mcp.prompt(
+    name="format_document",
+    description="Rewrite a document in markdown format",
+)
+def format_document(
+    doc_id: str = Field(description="The ID of the document to format"),
+) -> list[base.Message] :
+    prompt = f"""
+    You are a helpful assistant that formats documents in markdown format.
+    The document {doc_id} is:
+    {docs[doc_id]}
+    Format the document {doc_id} in markdown format.
+    Add headings and subheadings to the document.
+    Add lists to the document.
+    Add tables to the document.
+    Add images to the document.
+    Add links to the document.
+    Add bold and italic text to the document.
+    Add code blocks to the document.
+    Add blockquotes to the document.
+    Add footnotes to the document.
+    """
+    return [base.UserMessage(prompt)]
+    
+
 # TODO: Write a prompt to summarize a doc
 
 
