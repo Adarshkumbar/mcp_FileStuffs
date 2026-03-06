@@ -1,9 +1,8 @@
 from typing import List, Tuple
 from mcp.types import Prompt, PromptMessage
-from anthropic.types import MessageParam
 
 from core.chat import Chat
-from core.claude import Claude
+from core.ollama import Ollama
 from mcp_client import MCPClient
 
 
@@ -12,9 +11,9 @@ class CliChat(Chat):
         self,
         doc_client: MCPClient,
         clients: dict[str, MCPClient],
-        claude_service: Claude,
+        llm_service: Ollama,
     ):
-        super().__init__(clients=clients, claude_service=claude_service)
+        super().__init__(clients=clients, llm_service=llm_service)
 
         self.doc_client: MCPClient = doc_client
 
@@ -91,7 +90,7 @@ class CliChat(Chat):
 
 def convert_prompt_message_to_message_param(
     prompt_message: "PromptMessage",
-) -> MessageParam:
+) -> dict:
     role = "user" if prompt_message.role == "user" else "assistant"
 
     content = prompt_message.content
@@ -112,7 +111,7 @@ def convert_prompt_message_to_message_param(
             return {"role": role, "content": content_text}
 
     if isinstance(content, list):
-        text_blocks = []
+        text_parts: list[str] = []
         for item in content:
             # Check if item is a dict-like object with a "type" field
             if isinstance(item, dict) or hasattr(item, "__dict__"):
@@ -127,17 +126,17 @@ def convert_prompt_message_to_message_param(
                         if isinstance(item, dict)
                         else getattr(item, "text", "")
                     )
-                    text_blocks.append({"type": "text", "text": item_text})
+                    text_parts.append(item_text)
 
-        if text_blocks:
-            return {"role": role, "content": text_blocks}
+        if text_parts:
+            return {"role": role, "content": "\n".join(text_parts)}
 
     return {"role": role, "content": ""}
 
 
 def convert_prompt_messages_to_message_params(
     prompt_messages: List[PromptMessage],
-) -> List[MessageParam]:
+) -> List[dict]:
     return [
         convert_prompt_message_to_message_param(msg) for msg in prompt_messages
     ]
