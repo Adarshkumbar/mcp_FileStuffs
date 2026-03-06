@@ -1,11 +1,11 @@
 # MCP Chat
 
-MCP Chat is a command-line interface application that enables interactive chat capabilities with AI models through the Anthropic API. The application supports document retrieval, command-based prompts, and extensible tool integrations via the MCP (Model Control Protocol) architecture.
+MCP Chat is a command-line interface application that enables interactive chat capabilities with a **local Ollama model**. The application supports document retrieval, command-based prompts, and extensible tool integrations via the MCP (Model Context Protocol) architecture.
 
 ## Prerequisites
 
-- Python 3.9+
-- Anthropic API Key
+- Python 3.10+
+- [Ollama](https://ollama.com/) running locally
 
 ## Setup
 
@@ -14,7 +14,14 @@ MCP Chat is a command-line interface application that enables interactive chat c
 1. Create or edit the `.env` file in the project root and verify that the following variables are set correctly:
 
 ```
-ANTHROPIC_API_KEY=""  # Enter your Anthropic API secret key
+OLLAMA_MODEL=qwen2.5-coder:7b
+OLLAMA_BASE_URL=http://localhost:11434
+```
+
+Pull the model if needed:
+
+```bash
+ollama pull qwen2.5-coder:7b
 ```
 
 ### Step 2: Install dependencies
@@ -60,14 +67,15 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 2. Install dependencies:
 
 ```bash
-pip install anthropic python-dotenv prompt-toolkit "mcp[cli]==1.8.0"
+pip install -r requirements.txt
 ```
 
 3. Run the project
 
 ```bash
-python main.py
+python main.py 
 ```
+if there are issues use the python present in the .venv
 
 ## Usage
 
@@ -114,7 +122,7 @@ There are no lint or type checks implemented.
 ### Key Benefits of the SDK Approach
 No manual JSON schema writing required
 Type hints provide automatic validation
-Clear parameter descriptions help Claude understand tool usage
+Clear parameter descriptions help the model understand tool usage
 Error handling integrates naturally with Python exceptions
 Tool registration happens automatically through decorators
 The MCP Python SDK transforms tool creation from a complex schema-writing exercise into simple Python function definitions. This approach makes it much easier to build and maintain MCP servers while ensuring LLM receives properly formatted tool specifications.

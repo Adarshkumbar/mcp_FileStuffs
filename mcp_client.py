@@ -68,7 +68,10 @@ class MCPClient:
         resource_content = response.contents[0] # first content is the content of the resource
         
         if isinstance(resource_content, types.TextResourceContents):
-            if resource.mime_type == "application/json":
+            mime_type = getattr(resource_content, "mimeType", None) or getattr(
+                resource_content, "mime_type", None
+            )
+            if mime_type == "application/json":
                 return json.loads(resource_content.text)
             
             return resource_content.text
@@ -89,7 +92,8 @@ class MCPClient:
 async def main():
     async with MCPClient(
         # If using UV without python, update command to 'uv' and add "run" in the args.
-        command="python", args=["mcp_server.py"]
+        command=sys.executable,
+        args=["mcp_server.py"],
     ) as _client:
         result = await _client.list_tools()
         print(result)
