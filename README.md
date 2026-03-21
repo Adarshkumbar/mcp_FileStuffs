@@ -120,24 +120,68 @@ There are no lint or type checks implemented.
 
 
 ### Key Benefits of the SDK Approach
-No manual JSON schema writing required
-Type hints provide automatic validation
-Clear parameter descriptions help the model understand tool usage
-Error handling integrates naturally with Python exceptions
-Tool registration happens automatically through decorators
-The MCP Python SDK transforms tool creation from a complex schema-writing exercise into simple Python function definitions. This approach makes it much easier to build and maintain MCP servers while ensuring LLM receives properly formatted tool specifications.
 
+Using the MCP Python SDK in this project gives you:
 
-### For windows and facing issues with above steps (created venv for local dependencies)
+- Faster development: define tools/resources/prompts with Python decorators instead of writing raw JSON schemas.
+- Built-in validation: type hints and `pydantic` fields validate tool input and produce clearer errors.
+- Better model guidance: tool names, descriptions, and parameter metadata are exposed in a model-friendly way.
+- Cleaner maintenance: adding or updating server capabilities in `mcp_server.py` is straightforward and readable.
+- Safer integration: exceptions and return types map naturally to MCP responses, reducing protocol-level boilerplate.
 
-# 1. Activate your project venv
+### Windows troubleshooting (if setup fails)
+
+```powershell
+# 1) Activate your project venv
 .\.venv\Scripts\activate
 
-# 2. Make sure pip itself is up to date
+# 2) Upgrade pip
 python -m pip install --upgrade pip
 
-# 3. Remove any broken installs
+# 3) Remove broken pydantic installs
 pip uninstall -y pydantic-core pydantic
 
-# 4. Reinstall a known-good pydantic v2 (which pulls pydantic-core)
+# 4) Reinstall a known-good pydantic v2
 pip install "pydantic==2.9.2"
+```
+
+## Docker for this project (MCP + Ollama)
+
+In this repo, Docker is used to package and run your MCP server (`mcp_server.py`) consistently, while Ollama remains your local LLM provider.
+
+### Why this helps here
+
+- Your MCP server runs with pinned dependencies from `requirements.txt`.
+- Tool behavior stays consistent across machines.
+- You can run MCP servers in containers while your app still talks to local Ollama.
+- It is easier to test stdio MCP behavior (`stdin`/`stdout`) in a reproducible environment.
+
+### Build your MCP server image
+
+```bash
+docker build -t mcp-server:local .
+```
+
+### Verify container can load your server module
+
+```bash
+docker run --rm mcp-server:local python -c "import mcp_server; print('mcp_server import ok')"
+```
+
+### Run your MCP server over stdio
+
+```bash
+docker run --rm -i mcp-server:local
+```
+
+### Use a Docker MCP server from your app
+
+Your app can connect to extra MCP servers started with Docker commands.
+
+```bash
+python main.py "docker run -i --rm mcp-server:local"
+```
+
+Notes:
+- Keep `-i` so `stdin` stays open for stdio MCP.
+- `PYTHONUNBUFFERED=1` in the Docker image helps avoid delayed stdout responses.
